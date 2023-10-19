@@ -6,7 +6,9 @@ namespace FinanceApp.Services
 {
     public interface IRepositoryAccountTypes
     {
-        void Create(AccountType accountType);
+        Task Create(AccountType accountType);
+        Task<bool> Exists(string name, int userId);
+        Task<IEnumerable<AccountType>> Get(int userId);
     }
     public class RepositoryAccountTypes : IRepositoryAccountTypes
     {
@@ -16,13 +18,30 @@ namespace FinanceApp.Services
             connectionString = configuration.GetConnectionString("DatabaseConnection");
         }
 
-        public void Create(AccountType accountType)
+        public async Task Create(AccountType accountType)
         {
             using var connection = new SqlConnection(connectionString);
-            var id = connection.QuerySingle<int>($@"INSERT INTO AccountType(Name, UserId, Order) 
+            var id = await connection.QuerySingleAsync<int>($@"INSERT INTO AccountType(Name, UserId, Order) 
                                                     VALUES (@Name, @UserId, 0);
                                                     SELECT SCOPE_IDENTITY();", accountType);
             accountType.Id = id;
+        }
+
+        public async Task<bool> Exists(string name, int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            var exist = await connection.QueryFirstOrDefaultAsync<int>(
+                @"SELECT 1 FROM AccountType WHERE Name =@name AND UserId = @userId", 
+                new { name, userId});
+            return exist == 1;
+        }
+
+        public async Task<IEnumerable<AccountType>> Get(int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<AccountType>(
+                @"SELECT Id, Name, Order, FROM AccountType WHERE UserId = @userId",
+                new { userId });
         }
     }
 }

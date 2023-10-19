@@ -1,4 +1,5 @@
 ﻿using FinanceApp.Validations;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace FinanceApp.Models
@@ -10,6 +11,7 @@ namespace FinanceApp.Models
         [StringLength(maximumLength:50, MinimumLength =3, ErrorMessage ="La longitud del campo Nombre debe estar entre {2} y {1}")]
         [Display(Name = "Nombre del tipo cuenta")]
         //[FirstLetterUpperCase]
+        [Remote(action: "VerifyAccountExists", controller: "AccountType")]
         public string Name { get; set; }
         public int UsuarId { get; set; }
         public int Order { get; set; }

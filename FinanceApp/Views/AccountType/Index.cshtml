@@ -15,13 +15,14 @@
             <th>Nombre</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="sorteable">
         @foreach (var accountType in Model)
         {
             <tr>
                 <td>
-                    <a class="btn btn-primary">Editar</a>
-                    <a class="btn btn-danger">Borrar</a>
+                    <input type="hidden" value="@accountType.Id" class="ids">
+                    <a class="btn btn-primary" asp-action="Update" asp-route-id="@accountType.Id">Editar</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@accountType.Id">Borrar</a>
                 </td>
                 <td>
                     @accountType.Name
@@ -30,3 +31,38 @@
         }
     </tbody>
 </table>
+
+@section Scripts{
+    <script>
+        const urlSort = "@Url.Action("sort")";
+        $(async function(){
+            $("sorteable").sorteable({
+                stop: function(e, ui){
+                    await updateOrders();
+                }
+            });
+            async function updateOrders(){
+                const ids = getIdsFromElements();
+                await sendIdsToBackend(ids);
+            }
+            function getIdsFromElements(){
+                const ids = $(".ids").map(function(){
+                    return $(this).val();
+                }).get();
+
+                return ids;
+            }
+            async function sendIdsToBackend(ids){
+                var data = JSON.stringify(ids);
+                await fetch(urlSort, {
+                    method: "POST",
+                    body: data,
+                    headers: {
+                        "Content-Type" : "application/json"
+                    }
+                });
+            }
+
+        })
+    </script>
+}

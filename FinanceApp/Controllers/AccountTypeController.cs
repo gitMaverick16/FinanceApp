@@ -61,6 +61,61 @@ namespace FinanceApp.Controllers
             }
             return Json(true);
         }
+
+        [HttpGet]
+        public async Task<ActionResult> Update(int id)
+        {
+            var userId = _userService.GetUserId();
+            var accountType = await _repositoryAccountTypes.GetById(id, userId);
+            if(accountType is null)
+            {
+                return RedirectToAction("NotFound");
+            }
+            return View(accountType);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> Update(AccountType accountType)
+        {
+            var userId = _userService.GetUserId();
+            var accountTypeExists = await _repositoryAccountTypes.Exists(accountType.Name, userId);
+            if(accountType is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            await _repositoryAccountTypes.Update(accountType);
+            return RedirectToAction("Index");
+        }
+
+        public async Task<ActionResult> Delete(int id)
+        {
+            var userId = _userService.GetUserId();
+            var accountType = await _repositoryAccountTypes.GetById(id,userId);
+            if(accountType is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            return View(accountType);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccountType(int id)
+        {
+            var userId = _userService.GetUserId();
+            var accountType = await _repositoryAccountTypes.GetById(id, userId);
+            if (accountType is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            await _repositoryAccountTypes.Delete(id);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Sort([FromBody] int[] ids)
+        {
+            return Ok();
+        }
         
     }
 }

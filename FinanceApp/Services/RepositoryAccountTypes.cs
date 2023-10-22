@@ -7,8 +7,11 @@ namespace FinanceApp.Services
     public interface IRepositoryAccountTypes
     {
         Task Create(AccountType accountType);
+        Task Delete(int id);
         Task<bool> Exists(string name, int userId);
         Task<IEnumerable<AccountType>> Get(int userId);
+        Task<AccountType> GetById(int id, int userId);
+        Task Update(AccountType accountType);
     }
     public class RepositoryAccountTypes : IRepositoryAccountTypes
     {
@@ -42,6 +45,25 @@ namespace FinanceApp.Services
             return await connection.QueryAsync<AccountType>(
                 @"SELECT Id, Name, Order, FROM AccountType WHERE UserId = @userId",
                 new { userId });
+        }
+
+        public async Task Update(AccountType accountType)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync(@"UPDATE AccountType SET Name = @Name WHERE Id = @Id", accountType);
+        }
+
+        public async Task<AccountType> GetById(int id, int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryFirstOrDefaultAsync<AccountType>(@"SELECT Id, Name, Order
+                    FROM AccountType WHERE Id = @Id AND UserId = @UserId", new { id, userId });
+        }
+
+        public async Task Delete(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync("DELETE FROM AccountType WHERE Id = @Id", id);
         }
     }
 }

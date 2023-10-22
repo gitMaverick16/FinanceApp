@@ -36,7 +36,7 @@ namespace FinanceApp.Controllers
             {
                 return View(accountType);
             }
-            accountType.UsuarId = _userService.GetUserId();
+            accountType.UserId = _userService.GetUserId();
 
             var alreadyExists = await _repositoryAccountTypes.Exists(accountType.Name, accountType.Id);
             if (alreadyExists)
@@ -114,6 +114,22 @@ namespace FinanceApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Sort([FromBody] int[] ids)
         {
+            var userId = _userService.GetUserId();
+            var accountTypes = await _repositoryAccountTypes.Get(userId);
+            var idsAccountTypes = accountTypes.Select(x => x.Id);
+
+            var idsAccountTypesNotBelongToUser = ids.Except(idsAccountTypes).ToList();
+
+            if(idsAccountTypesNotBelongToUser.Count > 0)
+            {
+                return Forbid();
+            }
+            var sortedAccountTypes = ids.Select((value, index) => new AccountType()
+            {
+                Id = value,
+                Order = index + 1,
+            }).AsEnumerable();
+            await _repositoryAccountTypes.Sort(sortedAccountTypes);
             return Ok();
         }
         

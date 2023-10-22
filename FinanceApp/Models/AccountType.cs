@@ -13,7 +13,7 @@ namespace FinanceApp.Models
         //[FirstLetterUpperCase]
         [Remote(action: "VerifyAccountExists", controller: "AccountType")]
         public string Name { get; set; }
-        public int UsuarId { get; set; }
+        public int UserId { get; set; }
         public int Order { get; set; }
 
         //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IRepositoryAccountTypes, RepositoryAccountTypes>();
+builder.Services.AddTransient<IRepositoryAccounts, RepositoryAccounts>();
 builder.Services.AddTransient<IUserService, UserService>();
 
 var app = builder.Build();

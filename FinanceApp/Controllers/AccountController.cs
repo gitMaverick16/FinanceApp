@@ -47,6 +47,19 @@ namespace FinanceApp.Controllers
             return RedirectToAction("Index");
         }
 
+        public async Task<IActionResult> Index()
+        {
+            var userId = _userService.GetUserId();
+            var accountsWithAccountType = await _repositoryAccounts.Search(userId);
+            var model = accountsWithAccountType.GroupBy(x => x.AccountType)
+                .Select(g => new IndexAccountsViewModel
+                {
+                    AccountType = g.Key,
+                    Accounts = g.AsEnumerable()
+                }).ToList();
+            return View(model);
+        }
+
         private async Task<IEnumerable<SelectListItem>> GetAccountTypes(int userId)
         {
             var accountTypes = await _repositoryAccountTypes.Get(userId);

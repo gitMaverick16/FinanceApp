@@ -46,6 +46,47 @@ namespace FinanceApp.Controllers
             await _repositoryAccounts.Create(account);
             return RedirectToAction("Index");
         }
+        
+        [HttpPost]
+        public async Task<IActionResult> Update(AccountCreationViewModel accountUpdate)
+        {
+            var userId = _userService.GetUserId();
+            var account = await _repositoryAccounts.GetById(accountUpdate.Id, userId);
+
+            if (account is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            var accountType = await _repositoryAccountTypes.GetById(accountUpdate.AccountTypeId, userId);
+            if(accountType is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            await _repositoryAccounts.Update(accountUpdate);
+            return RedirectToAction("Index");
+        }
+
+
+        public async Task<IActionResult> Update(int id)
+        {
+            var userId = _userService.GetUserId();
+            var account = await _repositoryAccounts.GetById(id, userId);
+            if(account is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            var model = new AccountCreationViewModel()
+            {
+                Id = account.Id,
+                Name = account.Name,
+                AccountTypeId = account.AccountTypeId,
+                Description = account.Description,
+                Balance = account.Balance
+            };
+
+            model.AccountTypes = await GetAccountTypes(userId);
+            return View(model);
+        }
 
         public async Task<IActionResult> Index()
         {

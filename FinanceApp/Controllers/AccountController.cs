@@ -1,4 +1,5 @@
-﻿using FinanceApp.Models;
+﻿using AutoMapper;
+using FinanceApp.Models;
 using FinanceApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,14 +12,17 @@ namespace FinanceApp.Controllers
         private readonly IRepositoryAccountTypes _repositoryAccountTypes;
         private readonly IUserService _userService;
         private readonly IRepositoryAccounts _repositoryAccounts;
+        private readonly IMapper _mapper;
 
         public AccountController(IRepositoryAccountTypes repositoryAccountTypes,
             IUserService userService,
-            IRepositoryAccounts repositoryAccounts) 
+            IRepositoryAccounts repositoryAccounts,
+            IMapper mapper) 
         {
             _repositoryAccountTypes = repositoryAccountTypes;
             _userService = userService;
             _repositoryAccounts = repositoryAccounts;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> Create() {
@@ -66,6 +70,29 @@ namespace FinanceApp.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id) {
+            var userId = _userService.GetUserId();
+            var account = _repositoryAccounts.GetById(id,userId);
+            if(account is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            return View(account);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount(int id)
+        {
+            var userId = _userService.GetUserId();
+            var account = _repositoryAccounts.GetById(id, userId);
+            if (account is null)
+            {
+                return RedirectToAction("NotFound", "Home");
+            }
+            await _repositoryAccounts.Delete(id);
+            return RedirectToAction("Index");
+        }
 
         public async Task<IActionResult> Update(int id)
         {
@@ -75,14 +102,7 @@ namespace FinanceApp.Controllers
             {
                 return RedirectToAction("NotFound", "Home");
             }
-            var model = new AccountCreationViewModel()
-            {
-                Id = account.Id,
-                Name = account.Name,
-                AccountTypeId = account.AccountTypeId,
-                Description = account.Description,
-                Balance = account.Balance
-            };
+            var model = _mapper.Map<AccountCreationViewModel>(account);
 
             model.AccountTypes = await GetAccountTypes(userId);
             return View(model);

@@ -7,6 +7,7 @@ namespace FinanceApp.Services
     public interface IRepositoryAccounts
     {
         Task Create(Account account);
+        Task Delete(int id);
         Task<Account> GetById(int id, int userId);
         Task<IEnumerable<Account>> Search(int userId);
         Task Update(AccountCreationViewModel account);
@@ -56,6 +57,12 @@ namespace FinanceApp.Services
                 SET Name = @name, Balance = @balance, Description = @description,
                 AccountType = @accountType
                 WHERE Id = @Id", account);
+        }
+
+        public async Task Delete(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync("DELETE Account WHERE Id = @Id", new { id });
         }
     }
 }

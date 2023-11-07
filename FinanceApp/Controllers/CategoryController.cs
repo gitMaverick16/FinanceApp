@@ -16,6 +16,13 @@ namespace FinanceApp.Controllers
             _userService = userService;
         }
 
+        public async Task<IActionResult> Index()
+        {
+            var userId = _userService.GetUserId();
+            var categories = await _repositoryCategories.Get(userId);
+            return View(categories);
+        }
+
         [HttpGet]
         public IActionResult Create() {
             return View();

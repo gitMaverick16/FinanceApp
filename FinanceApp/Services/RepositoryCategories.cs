@@ -7,6 +7,7 @@ namespace FinanceApp.Services
     public interface IRepositoryCategories
     {
         Task Create(Category category);
+        Task<IEnumerable<Category>> Get(int userId);
     }
     public class RepositoryCategories : IRepositoryCategories
     {
@@ -25,6 +26,13 @@ namespace FinanceApp.Services
                 Values (@Name, @OperationTypeId, @UserId)
                 SELECT SCOPE_IDENTITY();", category);
             category.Id = id;
+        }
+
+        public async Task<IEnumerable<Category>> Get(int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryAsync<Category>("SELECT * FROM Category WHERE UserId = @userId",
+                new { userId });
         }
     }
 }

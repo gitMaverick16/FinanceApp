@@ -41,5 +41,34 @@ namespace FinanceApp.Controllers
             await _repositoryCategories.Create(category);
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> Update(int id)
+        {
+            var userId = _userService.GetUserId();
+            var category = await _repositoryCategories.GetById(id, userId);
+            if(category is null)
+            {
+                return RedirectToAction("NptFound", "Home");
+            }
+            return View(category);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(Category categoryUpdate)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(categoryUpdate);
+            }
+            var userId = _userService.GetUserId();
+            var category = await _repositoryCategories.GetById(categoryUpdate.Id, userId);
+            if (category is null)
+            {
+                return RedirectToAction("NptFound", "Home");
+            }
+            categoryUpdate.UserId = userId;
+            await _repositoryCategories.Update(categoryUpdate);
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using FinanceApp.Models;
 using Microsoft.Data.SqlClient;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FinanceApp.Services
 {
@@ -8,6 +9,8 @@ namespace FinanceApp.Services
     {
         Task Create(Category category);
         Task<IEnumerable<Category>> Get(int userId);
+        Task<Category> GetById(int id, int userId);
+        Task Update(Category category);
     }
     public class RepositoryCategories : IRepositoryCategories
     {
@@ -33,6 +36,21 @@ namespace FinanceApp.Services
             using var connection = new SqlConnection(connectionString);
             return await connection.QueryAsync<Category>("SELECT * FROM Category WHERE UserId = @userId",
                 new { userId });
+        }
+
+        public async Task<Category> GetById(int id, int userId)
+        {
+            using var connection = new SqlConnection(connectionString);
+            return await connection.QueryFirstOrDefaultAsync<Category>(@"SELECT * FROM Category
+                WHERE Id = @Id AND UserId = @userId", new { id, userId});
+        }
+
+        public async Task Update(Category category)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync(@"UPDATE Category SET Name = @Name, OperationTypeId = @OperationTypeId
+                WHERE Id = @Id",
+                category);
         }
     }
 }

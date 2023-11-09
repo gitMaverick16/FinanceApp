@@ -8,6 +8,7 @@ namespace FinanceApp.Services
     public interface IRepositoryCategories
     {
         Task Create(Category category);
+        Task Delete(int id);
         Task<IEnumerable<Category>> Get(int userId);
         Task<Category> GetById(int id, int userId);
         Task Update(Category category);
@@ -51,6 +52,12 @@ namespace FinanceApp.Services
             await connection.ExecuteAsync(@"UPDATE Category SET Name = @Name, OperationTypeId = @OperationTypeId
                 WHERE Id = @Id",
                 category);
+        }
+
+        public async Task Delete(int id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            await connection.ExecuteAsync(@"DELETE Category WHERE Id = @Id", new { id });
         }
     }
 }
